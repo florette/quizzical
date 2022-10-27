@@ -20,7 +20,6 @@ function Quiz(props) {
                 const newQ = data.results.map((q) => ({
                     ...q,
                     id: nanoid(),
-                    win: false,
                 }));
                 console.log(newQ);
 
@@ -58,7 +57,7 @@ function Quiz(props) {
                     const id = nanoid();
                     return (
                         <li key={id} onClick={(event) => selectAnswer(event)}>
-                            {decodeHtmlCharCodes(answer)}
+                            {decodeHtml(answer)}
                         </li>
                     );
                 });
@@ -84,7 +83,7 @@ function Quiz(props) {
             // create the questions and answers markup
             return (
                 <li key={question.id}>
-                    <h2>{decodeHtmlCharCodes(question.question)}</h2>
+                    <h2>{decodeHtml(question.question)}</h2>
                     <ul className="answer--list" data-id={question.id}>
                         {answerList}
                     </ul>
@@ -106,13 +105,10 @@ function Quiz(props) {
         );
     }
 
-    function decodeHtmlCharCodes(str) {
-        return str.replace(
-            /(&#(\d+);)|(&(\d+);)|(&quot;)|(&eacute;)|(&rsquo;)/g,
-            function (match, capture, charCode) {
-                return String.fromCharCode(charCode);
-            }
-        );
+    function decodeHtml(html) {
+        const txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
     }
 
     function selectAnswer(event) {
@@ -121,24 +117,6 @@ function Quiz(props) {
         const listArr = selectedEl.parentNode.childNodes;
         listArr.forEach((el) => el.classList.remove("selected"));
         selectedEl.classList.add("selected");
-
-        // check if it is the correct answer
-        const selectedID = selectedEl.parentNode.getAttribute("data-id");
-        const selectedAnswer = selectedEl.innerHTML;
-
-        setQuestions((prevQ) => {
-            const newQ = prevQ.map((q) => {
-                if (
-                    q.id === selectedID &&
-                    q.correct_answer === selectedAnswer
-                ) {
-                    return { ...q, win: true, responded: true };
-                } else {
-                    return { ...q, responded: true };
-                }
-            });
-            return newQ;
-        });
 
         // check if all questions are answered and enable the button
         const listSelected = document.querySelectorAll(".selected");
@@ -150,8 +128,6 @@ function Quiz(props) {
 
         // display result
         setDisplayResult(true);
-        const findCorrectAnsNum = questions.filter((q) => q.win);
-        setCorrectAnsNum(findCorrectAnsNum.length);
 
         // display correct answers in green and wrong answers in red
         questions.map((q) => {
@@ -164,17 +140,18 @@ function Quiz(props) {
             for (let child of targetChildren) {
                 if (
                     child.className === "selected" &&
-                    q.correct_answer === child.innerText
+                    decodeHtml(q.correct_answer) === child.innerText
                 ) {
                     child.classList.add("correct");
+                    setCorrectAnsNum((prevState) => prevState + 1);
                 } else if (
                     child.className === "selected" &&
-                    q.correct_answer !== child.innerText
+                    decodeHtml(q.correct_answer) !== child.innerText
                 ) {
                     child.classList.add("wrong");
                 } else if (
                     child.className !== "selected" &&
-                    q.correct_answer === child.innerText
+                    decodeHtml(q.correct_answer) === child.innerText
                 ) {
                     child.classList.add("correct");
                 }
