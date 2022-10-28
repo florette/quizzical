@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../App.css";
 import { nanoid } from "nanoid";
+import Option from "./Option";
 
 function Quiz(props) {
     const [showQuestions, setShowQuestions] = useState(false);
@@ -56,9 +57,11 @@ function Quiz(props) {
                 answerList = shuffledAswers.map((answer) => {
                     const id = nanoid();
                     return (
-                        <li key={id} onClick={(event) => selectAnswer(event)}>
-                            {decodeHtml(answer)}
-                        </li>
+                        <Option
+                            key={id}
+                            selectAnswer={selectAnswer}
+                            answer={decodeHtml(answer)}
+                        />
                     );
                 });
             } else if (typeBool) {
@@ -66,16 +69,16 @@ function Quiz(props) {
                 const idFalse = nanoid();
                 answerList = (
                     <>
-                        <li
+                        <Option
                             key={idTrue}
-                            onClick={(event) => selectAnswer(event)}>
-                            True
-                        </li>
-                        <li
+                            selectAnswer={selectAnswer}
+                            answer={"True"}
+                        />
+                        <Option
                             key={idFalse}
-                            onClick={(event) => selectAnswer(event)}>
-                            False
-                        </li>
+                            selectAnswer={selectAnswer}
+                            answer={"False"}
+                        />
                     </>
                 );
             }

@@ -77,6 +77,7 @@ button:disabled {
 
 .quiz {
     max-width: 600px;
+    padding: 20px;
 }
 
 .question--list li {
